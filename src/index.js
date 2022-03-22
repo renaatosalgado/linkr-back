@@ -2,10 +2,10 @@ import express, { json } from "express";
 import cors from "cors";
 import router from "./routes/index.js";
 
-express().use(cors());
-express().use(json());
+const app = express();
 
-express().use(router);
+app.use(cors());
+app.use(json());
 
 const PORT = process.env.PORT || 5000;
 
