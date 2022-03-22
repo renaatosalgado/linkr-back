@@ -1,31 +1,22 @@
 import { userRepository } from '../repositories/userRepository.js';
+import bcrypt from 'bcrypt';
 
 export async function createUser(req, res) {
+    const newUser = req.body;
+    const passwordHash = bcrypt.hashSync(newUser.password, 10);
+
     try {
-        const user = await userRepository.getUser(req.body);
+        const user = await userRepository.getUser(newUser.email);
 
         if (user.rowCount !== 0) {
             return res.sendStatus(409);
         }
 
-        await userRepository.createUser(req.body);
+        await userRepository.createUser({ ...newUser, passwordHash });
 
         return res.sendStatus(201);
     } catch (error) {
         console.log(error);
-        return res.sendStatus(500);
-    }
-}
-
-export async function login(req, res) {
-    try {
-        const user = await userRepository.getUser(req.body);
-        if (user.rowCount === 0) {
-            return res.sendStatus(404);
-        }
-
-        return res.send(user.rows);
-    } catch {
         return res.sendStatus(500);
     }
 }
