@@ -1,5 +1,12 @@
 import connection from "../db.js";
 
-async function createPost(body) {}
+async function publish(description, url, userId) {
+  return connection.query(
+    `
+    INSERT INTO posts (description, url, "userId") VALUES ($1, $2, $3)
+    `,
+    [description, url, userId]
+  );
+}
 
-export const postsRepository = { createPost };
+export const postsRepository = { publish };
