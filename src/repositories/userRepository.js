@@ -1,20 +1,28 @@
-import connection from '../db.js';
+import connection from "../db.js";
 
 async function createUser({ email, passwordHash, username, picture }) {
-    return connection.query(
-        `
+  return connection.query(
+    `
         INSERT INTO users (email, password, name, image)
         VALUES ($1, $2, $3, $4)`,
-        [email, passwordHash, username, picture]
-    );
+    [email, passwordHash, username, picture]
+  );
 }
 
-async function getUser(email) {
-    return connection.query(
-        `
+async function getUserByEmail(email) {
+  return connection.query(
+    `
         SELECT * FROM users WHERE email = $1`,
-        [email]
-    );
+    [email]
+  );
 }
 
-export const userRepository = { createUser, getUser };
+async function getUserById(id) {
+  return connection.query(
+    `
+        SELECT * FROM users WHERE id = $1`,
+    [id]
+  );
+}
+
+export const userRepository = { createUser, getUserByEmail, getUserById };

@@ -6,7 +6,7 @@ export async function createUser(req, res) {
     const passwordHash = bcrypt.hashSync(newUser.password, 10);
 
     try {
-        const user = await userRepository.getUser(newUser.email);
+        const user = await userRepository.getUserByEmail(newUser.email);
 
         if (user.rowCount !== 0) {
             return res.sendStatus(409);
