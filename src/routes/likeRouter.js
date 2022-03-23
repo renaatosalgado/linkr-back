@@ -4,8 +4,8 @@ import { checkLikeUser, toogleLike, totalLike } from "../controllers/likesContro
 
 const likeRouter = Router();
 
-likeRouter.post("/likes/toogle", validateToken, toogleLike);
-likeRouter.get("/likes/:postId/total", totalLike);
-likeRouter.get("/likes/:postId", validateToken, checkLikeUser);
+likeRouter.post("/toogle", toogleLike);
+likeRouter.get("/:postId/total", totalLike);
+likeRouter.get("/:postId", checkLikeUser);
 
 export default likeRouter;
