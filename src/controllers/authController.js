@@ -18,6 +18,7 @@ export async function login(req, res) {
     const token = uuid();
     await authRepository.createSession(token, user.id);
 
+    console.log({ token, user })
     return res.send({ token, user });
   }
 

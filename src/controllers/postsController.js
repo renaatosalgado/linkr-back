@@ -4,6 +4,7 @@ import urlMetadata from "url-metadata";
 export async function createPost(req, res) {
   const { url, description } = req.body;
   const user = res.locals.user;
+  console.log(user)
 
   let urlTitle = "";
   let urlDescription = "";

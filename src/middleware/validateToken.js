@@ -13,6 +13,7 @@ export async function validateToken(req, res, next) {
     return res.sendStatus(401);
   }
 
+  console.log(session.rows[0]);
   const user = await userRepository.getUserById(session.rows[0].userId);
   if (!user) {
     return res.sendStatus(401);
