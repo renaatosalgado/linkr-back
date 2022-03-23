@@ -11,9 +11,14 @@ export async function createPost(req, res) {
 
   try {
     const metadata = await urlMetadata(url);
+    if (!metadata.image) {
+      urlImage =
+        "https://st3.depositphotos.com/1322515/35964/v/450/depositphotos_359648638-stock-illustration-image-available-icon.jpg";
+    } else {
+      urlImage = metadata.image;
+    }
     urlTitle = metadata.title;
     urlDescription = metadata.description;
-    urlImage = metadata.image;
 
     await postsRepository.publish(
       description,
@@ -21,7 +26,7 @@ export async function createPost(req, res) {
       user.id,
       urlTitle,
       urlDescription,
-      urlImage    
+      urlImage
     );
 
     res.sendStatus(201);
