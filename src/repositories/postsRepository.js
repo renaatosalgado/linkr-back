@@ -18,8 +18,11 @@ async function publish(
 
 async function listAll() {
   return connection.query(`
-  SELECT * FROM posts 
-  ORDER BY id 
+  SELECT p.*, 
+  u.name author, u.image "profilePicture" 
+  FROM posts p
+  LEFT JOIN users u ON u.id = p."userId"
+  ORDER BY p.id 
   DESC
   LIMIT 20
   `);
