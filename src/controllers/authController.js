@@ -30,10 +30,9 @@ export async function login(req, res) {
 }
 
 export async function logout(req, res) {
-    const { userId } = req.body;
-
+    const { user } = res.locals;
     try {
-        await authRepository.deleteSession(userId);
+        await authRepository.deleteSession(user.id);
 
         return res.sendStatus(200);
     } catch {
