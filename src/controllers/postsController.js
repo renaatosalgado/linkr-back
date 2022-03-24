@@ -40,3 +40,15 @@ export async function listPosts(req, res) {
     res.status(500).send(error);
   }
 }
+
+export async function getHashtagPost(req, res) {
+  const {hashtag} = req.params;
+  try {
+    const result = await postsRepository.listHashtag(hashtag);
+
+    res.status(200).send(result.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+}

@@ -28,4 +28,18 @@ async function listAll() {
   `);
 }
 
-export const postsRepository = { publish, listAll };
+async function listHashtag(hashtag) {
+  return connection.query(`
+  SELECT p.*, 
+  u.name author, u.image "profilePicture" 
+  FROM posts p
+  LEFT JOIN users u ON u.id = p."userId"
+  WHERE p.description LIKE $1
+  ORDER BY p.id 
+  DESC
+  LIMIT 20
+  `,[`%#${hashtag}%`]);
+}
+
+
+export const postsRepository = { publish, listAll,listHashtag };
