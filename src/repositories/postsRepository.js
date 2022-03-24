@@ -28,6 +28,17 @@ async function listAll() {
   `);
 }
 
+async function editPost(description, id) {
+  return connection.query(
+    `
+  UPDATE posts
+  SET description = $1 
+  WHERE id=$2
+  `,
+    [description, id]
+  );
+}
+
 async function userPosts(userId) {
     return connection.query(
         `
@@ -44,4 +55,4 @@ async function userPosts(userId) {
     );
 }
 
-export const postsRepository = { publish, listAll, userPosts };
+export const postsRepository = { publish, listAll, userPosts, editPost };

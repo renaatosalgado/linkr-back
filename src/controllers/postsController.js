@@ -57,3 +57,15 @@ export async function listUserPosts(req, res) {
         res.status(500).send(error);
     }
 }
+
+export async function editPost(req, res) {
+  const { id } = req.params;
+  const { description } = req.body;
+  try {
+    await postsRepository.editPost(description, id);
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+}
