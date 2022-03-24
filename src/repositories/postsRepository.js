@@ -28,4 +28,15 @@ async function listAll() {
   `);
 }
 
-export const postsRepository = { publish, listAll };
+async function editPost(description, id) {
+  return connection.query(
+    `
+  UPDATE posts
+  SET description = $1 
+  WHERE id=$2
+  `,
+    [description, id]
+  );
+}
+
+export const postsRepository = { publish, listAll, editPost };

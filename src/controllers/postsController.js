@@ -21,7 +21,7 @@ export async function createPost(req, res) {
       user.id,
       urlTitle,
       urlDescription,
-      urlImage    
+      urlImage
     );
 
     res.sendStatus(201);
@@ -35,6 +35,18 @@ export async function listPosts(req, res) {
     const result = await postsRepository.listAll();
 
     res.status(200).send(result.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+}
+
+export async function editPost(req, res) {
+  const { id } = req.params;
+  const { description } = req.body;
+  try {
+    await postsRepository.editPost(description, id);
+    res.sendStatus(200);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
