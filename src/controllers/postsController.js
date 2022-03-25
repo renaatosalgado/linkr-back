@@ -57,3 +57,27 @@ export async function listUserPosts(req, res) {
         res.status(500).send(error);
     }
 }
+
+export async function editPost(req, res) {
+  const { id } = req.params;
+  const { description } = req.body;
+  try {
+    await postsRepository.editPost(description, id);
+    res.sendStatus(200);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+}
+
+export async function getHashtagPost(req, res) {
+  const {hashtag} = req.params;
+  try {
+    const result = await postsRepository.listHashtag(hashtag);
+
+    res.status(200).send(result.rows);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send(error);
+  }
+}

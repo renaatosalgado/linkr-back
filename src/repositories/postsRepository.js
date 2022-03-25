@@ -28,6 +28,32 @@ async function listAll() {
   `);
 }
 
+async function listHashtag(hashtag) {
+  return connection.query(`
+  SELECT p.*, 
+  u.name author, u.image "profilePicture" 
+  FROM posts p
+  LEFT JOIN users u ON u.id = p."userId"
+  WHERE p.description LIKE $1
+  ORDER BY p.id 
+  DESC
+  LIMIT 20
+  `,[`%#${hashtag}%`]);
+}
+
+
+
+async function editPost(description, id) {
+  return connection.query(
+    `
+  UPDATE posts
+  SET description = $1 
+  WHERE id=$2
+  `,
+    [description, id]
+  );
+}
+
 async function userPosts(userId) {
     return connection.query(
         `
@@ -43,5 +69,4 @@ async function userPosts(userId) {
         [userId]
     );
 }
-
-export const postsRepository = { publish, listAll, userPosts };
+export const postsRepository = { publish, listAll, userPosts, editPost,listHashtag };
