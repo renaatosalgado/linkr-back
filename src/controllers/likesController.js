@@ -1,5 +1,5 @@
 import { userRepository } from "../repositories/userRepository.js";
-import { likeRepositoy } from "../repositories/likeRepositoy.js";
+import { likeRepositoy } from "../repositories/likeRepository.js";
 
 export async function toggleLike(req, res) {
   const { like, postId } = req.body;
