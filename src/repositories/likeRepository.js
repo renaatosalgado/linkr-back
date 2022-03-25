@@ -30,4 +30,12 @@ async function getTwoNamesThatLiked(userId, postId) {
     [postId, userId]);
 }
 
-export const likeRepositoy = { insertLike, removeLike, totalLike, checkLike, getTwoNamesThatLiked };
+async function deleteLikes(postId){
+  return connection.query(`
+  DELETE 
+  FROM likes
+  WHERE "postId" = $1
+  `,[postId])
+}
+
+export const likeRepositoy = { insertLike, removeLike, totalLike, checkLike, getTwoNamesThatLiked, deleteLikes };
