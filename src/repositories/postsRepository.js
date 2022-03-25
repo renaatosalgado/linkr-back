@@ -69,4 +69,14 @@ async function userPosts(userId) {
         [userId]
     );
 }
-export const postsRepository = { publish, listAll, userPosts, editPost,listHashtag };
+
+async function deletePost(postId){
+  return connection.query(`
+    DELETE 
+    FROM posts
+    WHERE id=$1
+  `, [postId])
+}
+
+
+export const postsRepository = { publish, listAll, userPosts, editPost,listHashtag, deletePost };
