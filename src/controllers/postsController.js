@@ -63,18 +63,6 @@ export async function listUserPosts(req, res) {
   }
 }
 
-export async function editPost(req, res) {
-  const { id } = req.params;
-  const { description } = req.body;
-  try {
-    await postsRepository.editPost(description, id);
-    res.sendStatus(200);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-}
-
 export async function getHashtagPost(req, res) {
   const { hashtag } = req.params;
   try {
@@ -87,40 +75,12 @@ export async function getHashtagPost(req, res) {
   }
 }
 
-export async function listUserPosts(req, res) {
-  const { id: userId } = req.params;
-  try {
-    const { rows: posts } = await postsRepository.userPosts(userId);
-    const {
-      rows: [user],
-    } = await userRepository.getUserById(userId);
-    const authorName = user.name;
-
-    res.status(200).send({ posts: [...posts], authorName });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-}
-
 export async function editPost(req, res) {
   const { id } = req.params;
   const { description } = req.body;
   try {
     await postsRepository.editPost(description, id);
     res.sendStatus(200);
-  } catch (error) {
-    console.log(error);
-    res.status(500).send(error);
-  }
-}
-
-export async function getHashtagPost(req, res) {
-  const { hashtag } = req.params;
-  try {
-    const result = await postsRepository.listHashtag(hashtag);
-
-    res.status(200).send(result.rows);
   } catch (error) {
     console.log(error);
     res.status(500).send(error);
