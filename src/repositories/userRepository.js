@@ -25,4 +25,17 @@ async function getUserById(id) {
   );
 }
 
-export const userRepository = { createUser, getUserByEmail, getUserById };
+async function getUserByName(name) {
+  return connection.query(
+    `
+        SELECT * FROM users WHERE name iLIKE $1`,
+    [`${name}%`]
+  );
+}
+
+export const userRepository = {
+  createUser,
+  getUserByEmail,
+  getUserById,
+  getUserByName,
+};
