@@ -27,7 +27,6 @@ export async function searchUser(req, res) {
 
   try {
     const result = await userRepository.getUserByName(name);
-    console.log(result);
 
     res.send(result.rows);
   } catch (error) {
