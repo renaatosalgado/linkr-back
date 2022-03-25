@@ -20,4 +20,14 @@ async function checkLike(userId, postId) {
     [userId, postId]);
 }
 
-export const likeRepositoy = { insertLike, removeLike, totalLike, checkLike };
+async function getTwoNamesThatLiked(userId, postId) {
+  return connection.query(`SELECT u.name FROM likes l
+    LEFT JOIN users u ON u.id = l."userId"
+    LEFT JOIN posts p ON p.id = l."postId"
+    WHERE l."postId" = $1 AND l."userId" != $2
+    ORDER BY l."userId" ASC
+    LIMIT 2`,
+    [postId, userId]);
+}
+
+export const likeRepositoy = { insertLike, removeLike, totalLike, checkLike, getTwoNamesThatLiked };
