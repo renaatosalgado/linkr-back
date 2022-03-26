@@ -31,7 +31,6 @@ export async function login(req, res) {
 
 export async function logout(req, res) {
     const { user } = res.locals;
-    console.log(user);
     try {
         await authRepository.deleteSession(user.id);
 
