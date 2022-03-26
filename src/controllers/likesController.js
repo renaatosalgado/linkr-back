@@ -12,7 +12,7 @@ export async function toggleLike(req, res) {
         );
 
         if (userRows.length === 0) {
-            return res.sendStatus(404).send('User not found');
+            return res.status(404).send('User not found');
         }
 
         const [user] = userRows;
@@ -37,7 +37,7 @@ export async function totalLike(req, res) {
         const { rows } = await likeRepositoy.totalLike(postId);
 
         if (rows.length === 0) {
-            return res.sendStatus(404).send('Post id not found');
+            return res.status(404).send('Post id not found');
         }
 
         res.status(200).send(rows[0].total);
