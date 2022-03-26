@@ -1,4 +1,7 @@
 import connection from '../db.js';
+import pkg from 'sqlstring';
+
+const { format } = pkg;
 
 async function publish(
     description,
@@ -8,75 +11,85 @@ async function publish(
     urlDescription,
     urlImage
 ) {
-    return connection.query(
-        `
-    INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage") VALUES ($1, $2, $3, $4, $5, $6)
-    `,
+    const query = format(
+        `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage") 
+        VALUES (?, ?, ?, ?, ?, ?)`,
         [description, url, userId, urlTitle, urlDescription, urlImage]
     );
+    return connection.query(query);
 }
 
 async function listAll() {
-    return connection.query(`
-  SELECT p.*, 
-  u.name author, u.image "profilePicture" 
-  FROM posts p
-  LEFT JOIN users u ON u.id = p."userId"
-  ORDER BY p.id 
-  DESC
-  LIMIT 20
-  `);
+    const query = format(
+        `SELECT p.*, 
+        u.name author, u.image "profilePicture" 
+        FROM posts p
+        LEFT JOIN users u ON u.id = p."userId"
+        ORDER BY p.id 
+        DESC
+        LIMIT 20`
+    );
+
+    return connection.query(query);
 }
 
 async function listHashtag(hashtag) {
-  return connection.query(`
-  SELECT p.*, 
-  u.name author, u.image "profilePicture" 
-  FROM posts p
-  LEFT JOIN users u ON u.id = p."userId"
-  WHERE p.description LIKE $1
-  ORDER BY p.id 
-  DESC
-  LIMIT 20
-  `,[`%#${hashtag}%`]);
+    const query = format(
+        `SELECT p.*, 
+        u.name author, u.image "profilePicture" 
+        FROM posts p
+        LEFT JOIN users u ON u.id = p."userId"
+        WHERE p.description LIKE ?
+        ORDER BY p.id 
+        DESC
+        LIMIT 20`,
+        [`%#${hashtag}%`]
+    );
+    return connection.query(query);
 }
 
-
-
 async function editPost(description, id) {
-  return connection.query(
-    `
-  UPDATE posts
-  SET description = $1 
-  WHERE id=$2
-  `,
-    [description, id]
-  );
+    const query = format(
+        `UPDATE posts
+        SET description = ?
+        WHERE id=?`,
+        [description, id]
+    );
+    return connection.query(query);
 }
 
 async function userPosts(userId) {
-    return connection.query(
-        `
-    SELECT p.*, 
-    u.name author, u.image "profilePicture" 
-    FROM posts p
-    LEFT JOIN users u ON u.id = p."userId"
-    WHERE p."userId" = $1
-    ORDER BY p.id 
-    DESC
-    LIMIT 20
-    `,
+    const query = format(
+        `SELECT p.*, 
+        u.name author, u.image "profilePicture" 
+        FROM posts p
+        LEFT JOIN users u ON u.id = p."userId"
+        WHERE p."userId" = ?
+        ORDER BY p.id 
+        DESC
+        LIMIT 20`,
         [userId]
     );
+
+    return connection.query(query);
 }
 
-async function deletePost(postId){
-  return connection.query(`
-    DELETE 
-    FROM posts
-    WHERE id=$1
-  `, [postId])
+async function deletePost(postId) {
+    const query = format(
+        `DELETE 
+        FROM posts
+        WHERE id=?`,
+        [postId]
+    );
+
+    return connection.query(query);
 }
 
-
-export const postsRepository = { publish, listAll, userPosts, editPost,listHashtag, deletePost };
+export const postsRepository = {
+    publish,
+    listAll,
+    userPosts,
+    editPost,
+    listHashtag,
+    deletePost,
+};
