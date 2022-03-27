@@ -97,4 +97,13 @@ async function verifyHashtags(hashtags,postId){
     }
   }
 }
-export const postsRepository = { publish, listAll, userPosts, editPost,listHashtag,addHashtagsPost };
+
+async function deletePost(postId){
+  return connection.query(`
+    DELETE 
+    FROM posts
+    WHERE id=$1
+  `, [postId])
+}
+
+export const postsRepository = { publish, listAll, userPosts, editPost,listHashtag, deletePost,addHashtagsPost };
