@@ -1,30 +1,28 @@
 import connection from '../db.js';
+import pkg from 'sqlstring';
+
+const { format } = pkg;
 
 async function createSession(token, userId) {
-    return connection.query(
-        `
-        INSERT INTO sessions (token, "userId")
-        VALUES ($1, $2)`,
+    const query = format(
+        `INSERT INTO sessions (token, "userId")
+        VALUES (?, ?)`,
         [token, userId]
     );
+
+    return connection.query(query);
 }
 
 async function getSession(token) {
-    return connection.query(
-        `
-        SELECT * FROM sessions WHERE token = $1
-    `,
-        [token]
-    );
+    const query = format(`SELECT * FROM sessions WHERE token = ?`, [token]);
+
+    return connection.query(query);
 }
 
 async function deleteSession(userId) {
-    return connection.query(
-        `
-        DELETE FROM sessions WHERE "userId"=$1
-        `,
-        [userId]
-    );
+    const query = format(`DELETE FROM sessions WHERE "userId"=?`, [userId]);
+
+    return connection.query(query);
 }
 
 export const authRepository = { createSession, getSession, deleteSession };

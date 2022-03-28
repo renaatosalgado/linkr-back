@@ -35,7 +35,11 @@ export async function logout(req, res) {
         await authRepository.deleteSession(user.id);
 
         return res.sendStatus(200);
-    } catch {
+    } catch (error) {
         return res.sendStatus(500);
     }
+}
+
+export async function authToken(req, res) {
+    return res.sendStatus(200);
 }
