@@ -33,7 +33,7 @@ export async function createPost(req, res) {
         urlTitle = metadata.title;
         urlDescription = metadata.description;
 
-        await postsRepository.publish(
+        const id = await postsRepository.publish(
             description,
             url,
             user.id,
@@ -42,8 +42,11 @@ export async function createPost(req, res) {
             urlImage
         );
 
+        addHashtagsPost(hashtags, id);
+
         res.sendStatus(201);
     } catch (error) {
+        console.log(error);
         res.status(500).send(error);
     }
 }
@@ -92,8 +95,8 @@ export async function deletePost(req, res) {
 
     try {
         await likeRepositoy.deleteLikes(id);
-        await postsRepository.deletePost(id);
         await postsRepository.deletePostsTrends(id);
+        await postsRepository.deletePost(id);
 
         res.sendStatus(200);
     } catch (error) {
@@ -134,7 +137,7 @@ async function verifyHashtags(hashtags, postId) {
             if (hashtags[i] === trends.rows[j].name) {
                 await postsRepository.insertPostsTrend(
                     trends.rows[j].id,
-                    postId
+                    postId.rows[0].id
                 );
                 break;
             }
@@ -145,17 +148,17 @@ async function verifyHashtags(hashtags, postId) {
 
                 await postsRepository.insertPostsTrend(
                     hashtagId.rows[0].id,
-                    postId
+                    postId.rows[0].id
                 );
             }
         }
     }
 }
 
-//async function addHashtagsPost(hashtags, postId) {
-//    try {
-//        verifyHashtags(hashtags, postId);
-//    } catch (error) {
-//        console.log(error);
-//    }
-//}
+async function addHashtagsPost(hashtags, postId) {
+    try {
+        verifyHashtags(hashtags, postId);
+    } catch (error) {
+        console.log(error);
+    }
+}

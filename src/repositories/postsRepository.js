@@ -11,13 +11,17 @@ async function publish(
     urlDescription,
     urlImage
 ) {
-    const query = format(
+    //  const query = format(
+    //      `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage")
+    //      VALUES (?,?,?,?,?,?)`,
+    //      [description, url, userId, urlTitle, urlDescription, urlImage]
+    //  );
+
+    return connection.query(
         `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage") 
-        VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
+        VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
         [description, url, userId, urlTitle, urlDescription, urlImage]
     );
-
-    return connection.query(query);
 }
 
 async function listAll() {
@@ -44,7 +48,7 @@ async function listHashtag(hashtag) {
         ORDER BY p.id 
         DESC
         LIMIT 20`,
-        [`% #${hashtag} %`]
+        [`%#${hashtag}%`]
     );
 
     return connection.query(query);
@@ -94,21 +98,12 @@ async function insertPostsTrend(trendId, postId) {
         `INSERT INTO "postsTrends" ("trendId","postId") VALUES (?,?)`,
         [trendId, postId]
     );
-
     return connection.query(query);
 }
 
 async function insertTrendsHashtag(hashtag) {
     const query = format(`INSERT INTO trends (name) VALUES (?) RETURNING id`, [
         hashtag,
-    ]);
-
-    return connection.query(query);
-}
-
-async function deletePostsTrends(postId) {
-    const query = format(`DELETE FROM "postsTrends" WHERE "postId"=?`, [
-        postId,
     ]);
 
     return connection.query(query);
