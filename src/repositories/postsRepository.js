@@ -56,7 +56,7 @@ async function deletePostsTrends(id) {
     return connection.query(query);
 }
 
-async function editPost(description, id, hashtags) {
+async function editPost(description, id) {
     const query = format(
         `UPDATE posts
         SET description = ?
@@ -64,19 +64,7 @@ async function editPost(description, id, hashtags) {
         [description, id]
     );
 
-    await deletePostsTrends(id);
-
-    verifyHashtags(hashtags, id);
-
     return connection.query(query);
-}
-
-async function addHashtagsPost(hashtags, postId) {
-    try {
-        verifyHashtags(hashtags, postId);
-    } catch (error) {
-        console.log(error);
-    }
 }
 
 async function userPosts(userId) {
@@ -118,24 +106,6 @@ async function insertTrendsHashtag(hashtag) {
     return connection.query(query);
 }
 
-async function verifyHashtags(hashtags, postId) {
-    const trends = await getTrends();
-
-    for (let i = 0; i < hashtags.length; i++) {
-        for (let j = 0; j < trends.rows.length; j++) {
-            if (hashtags[i] === trends.rows[j].name) {
-                await insertPostsTrend(trends.rows[j].id, postId);
-                break;
-            }
-            if (j === trends.rows.length - 1) {
-                const hashtagId = await insertTrendsHashtag(hashtags[i]);
-
-                await insertPostsTrend(hashtagId.rows[0].id, postId);
-            }
-        }
-    }
-}
-
 async function deletePostsTrends(postId) {
     const query = format(`DELETE FROM "postsTrends" WHERE "postId"=?`, [
         postId,
@@ -147,8 +117,6 @@ async function deletePostsTrends(postId) {
 async function deletePost(postId) {
     const query = format(`DELETE FROM posts WHERE id=?`, [postId]);
 
-    await deletePostsTrends(postId);
-
     return connection.query(query);
 }
 
@@ -159,5 +127,8 @@ export const postsRepository = {
     editPost,
     listHashtag,
     deletePost,
-    addHashtagsPost,
+    deletePostsTrends,
+    getTrends,
+    insertPostsTrend,
+    insertTrendsHashtag,
 };
