@@ -13,7 +13,7 @@ async function publish(
 ) {
     const query = format(
         `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage") 
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+        VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
         [description, url, userId, urlTitle, urlDescription, urlImage]
     );
 
@@ -40,7 +40,7 @@ async function listHashtag(hashtag) {
         u.name author, u.image "profilePicture" 
         FROM posts p
         LEFT JOIN users u ON u.id = p."userId"
-        WHERE p.description LIKE $1
+        WHERE p.description LIKE ?
         ORDER BY p.id 
         DESC
         LIMIT 20`,
@@ -50,22 +50,25 @@ async function listHashtag(hashtag) {
     return connection.query(query);
 }
 
+async function deletePostsTrends(id) {
+    const query = format(`DELETE FROM "postsTrends" WHERE "postId"=?`, [id]);
+
+    return connection.query(query);
+}
+
 async function editPost(description, id, hashtags) {
-    const queryDelete = format(`DELETE FROM "postsTrends" WHERE "postId"=?`, [
-        id,
-    ]);
-    const queryUpdate = format(
+    const query = format(
         `UPDATE posts
-        SET description = $1 
-        WHERE id=$2`,
+        SET description = ?
+        WHERE id=?`,
         [description, id]
     );
 
-    await connection.query(queryDelete);
+    await deletePostsTrends(id);
 
     verifyHashtags(hashtags, id);
 
-    return connection.query(queryUpdate);
+    return connection.query(query);
 }
 
 async function addHashtagsPost(hashtags, postId) {
@@ -92,48 +95,61 @@ async function userPosts(userId) {
     return connection.query(query);
 }
 
+async function getTrends() {
+    const query = format(`SELECT * FROM trends`);
+
+    return connection.query(query);
+}
+
+async function insertPostsTrend(trendId, postId) {
+    const query = format(
+        `INSERT INTO "postsTrends" ("trendId","postId") VALUES (?,?)`,
+        [trendId, postId]
+    );
+
+    return connection.query(query);
+}
+
+async function insertTrendsHashtag(hashtag) {
+    const query = format(`INSERT INTO trends (name) VALUES (?) RETURNING id`, [
+        hashtag,
+    ]);
+
+    return connection.query(query);
+}
+
 async function verifyHashtags(hashtags, postId) {
-    const trends = await connection.query(format(`SELECT * FROM trends`));
+    const trends = await getTrends();
 
     for (let i = 0; i < hashtags.length; i++) {
         for (let j = 0; j < trends.rows.length; j++) {
             if (hashtags[i] === trends.rows[j].name) {
-                await connection.query(
-                    format(
-                        `INSERT INTO "postsTrends" ("trendId","postId") VALUES (?,?)`,
-                        [trends.rows[j].id, postId]
-                    )
-                );
+                await insertPostsTrend(trends.rows[j].id, postId);
                 break;
             }
             if (j === trends.rows.length - 1) {
-                const hashtagId = await connection.query(
-                    format(
-                        `INSERT INTO trends (name) VALUES ($1) RETURNING id`,
-                        [hashtags[i]]
-                    )
-                );
-                await connection.query(
-                    format(
-                        `INSERT INTO "postsTrends" ("trendId","postId") VALUES ($1,$2)`,
-                        [hashtagId.rows[0].id, postId]
-                    )
-                );
+                const hashtagId = await insertTrendsHashtag(hashtags[i]);
+
+                await insertPostsTrend(hashtagId.rows[0].id, postId);
             }
         }
     }
 }
 
+async function deletePostsTrends(postId) {
+    const query = format(`DELETE FROM "postsTrends" WHERE "postId"=?`, [
+        postId,
+    ]);
+
+    return connection.query(query);
+}
+
 async function deletePost(postId) {
-    const queryPostsTrends = format(
-        `DELETE FROM "postsTrends" WHERE "postId"=?`,
-        [postId]
-    );
-    const queryPosts = format(`DELETE FROM posts WHERE id=?`, [postId]);
+    const query = format(`DELETE FROM posts WHERE id=?`, [postId]);
 
-    await connection.query(queryPostsTrends);
+    await deletePostsTrends(postId);
 
-    return connection.query(queryPosts);
+    return connection.query(query);
 }
 
 export const postsRepository = {
