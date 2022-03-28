@@ -33,7 +33,9 @@ export async function createPost(req, res) {
         urlTitle = metadata.title;
         urlDescription = metadata.description;
 
-        const id = await postsRepository.publish(
+        const {
+            rows: [postId],
+        } = await postsRepository.publish(
             description,
             url,
             user.id,
@@ -42,7 +44,7 @@ export async function createPost(req, res) {
             urlImage
         );
 
-        addHashtagsPost(hashtags, id);
+        addHashtagsPost(hashtags, postId.id);
 
         res.sendStatus(201);
     } catch (error) {
@@ -137,7 +139,7 @@ async function verifyHashtags(hashtags, postId) {
             if (hashtags[i] === trends.rows[j].name) {
                 await postsRepository.insertPostsTrend(
                     trends.rows[j].id,
-                    postId.rows[0].id
+                    postId
                 );
                 break;
             }
@@ -148,7 +150,7 @@ async function verifyHashtags(hashtags, postId) {
 
                 await postsRepository.insertPostsTrend(
                     hashtagId.rows[0].id,
-                    postId.rows[0].id
+                    postId
                 );
             }
         }
