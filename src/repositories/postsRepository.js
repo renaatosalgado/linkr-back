@@ -11,17 +11,13 @@ async function publish(
     urlDescription,
     urlImage
 ) {
-    //  const query = format(
-    //      `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage")
-    //      VALUES (?,?,?,?,?,?)`,
-    //      [description, url, userId, urlTitle, urlDescription, urlImage]
-    //  );
-
-    return connection.query(
-        `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage") 
-        VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+    const query = format(
+        `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage")
+        VALUES (?,?,?,?,?,?) RETURNING id`,
         [description, url, userId, urlTitle, urlDescription, urlImage]
     );
+
+    return connection.query(query);
 }
 
 async function listAll() {
