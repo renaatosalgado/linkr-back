@@ -2,6 +2,7 @@ import { postsRepository } from '../repositories/postsRepository.js';
 import urlMetadata from 'url-metadata';
 import { userRepository } from '../repositories/userRepository.js';
 import { likeRepositoy } from '../repositories/likeRepository.js';
+import pkg from 'sqlstring';
 
 export async function createPost(req, res) {
     const { url, description } = req.body;
@@ -31,7 +32,14 @@ export async function createPost(req, res) {
             urlImage = metadata.image;
         }
         urlTitle = metadata.title;
-        urlDescription = metadata.description;
+
+        for (let i = 0; i < metadata.description.length; i++) {
+            if (metadata.description[i] === "'") {
+                urlDescription += '`';
+            } else {
+                urlDescription += metadata.description[i];
+            }
+        }
 
         const {
             rows: [postId],
@@ -56,6 +64,18 @@ export async function createPost(req, res) {
 export async function listPosts(req, res) {
     try {
         const result = await postsRepository.listAll();
+
+        result.rows.map((post) => {
+            let description = ``;
+            for (let i = 0; i < post.urlDescription.length; i++) {
+                if (post.urlDescription[i] === '`') {
+                    description += "'";
+                } else {
+                    description += post.urlDescription[i];
+                }
+            }
+            post.urlDescription = description;
+        });
 
         res.status(200).send(result.rows);
     } catch (error) {
