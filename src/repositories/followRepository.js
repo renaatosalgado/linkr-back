@@ -3,7 +3,7 @@ import pkg from 'sqlstring';
 
 const { format } = pkg;
 
-async function followUser(followerId, followedId) {
+async function followUser(followedId, followerId) {
 
     const query = format(
         `INSERT INTO follows ("followerId", "followedId")
@@ -13,7 +13,7 @@ async function followUser(followerId, followedId) {
     return connection.query(query);
 }
 
-async function isFollowing(followerId, followedId) {
+async function isFollowing(followedId,followerId) {
     const query = format(
         `SELECT * FROM follows
         WHERE "followerId" =  ?
@@ -23,7 +23,7 @@ async function isFollowing(followerId, followedId) {
     return connection.query(query);
 }
 
-async function unFollowUser(followerId, followedId){
+async function unFollowUser(followedId, followerId){
     const query = format(
         `DELETE FROM follows
         WHERE "followerId" =  ?
