@@ -61,7 +61,7 @@ async function deleteLikes(postId) {
     return connection.query(query);
 }
 
-export const likeRepositoy = {
+export const likeRepository = {
     insertLike,
     removeLike,
     totalLike,
