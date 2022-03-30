@@ -2,7 +2,6 @@ import { postsRepository } from '../repositories/postsRepository.js';
 import urlMetadata from 'url-metadata';
 import { userRepository } from '../repositories/userRepository.js';
 import { likeRepositoy } from '../repositories/likeRepository.js';
-import pkg from 'sqlstring';
 
 export async function createPost(req, res) {
     const { url, description } = req.body;

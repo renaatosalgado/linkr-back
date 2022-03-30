@@ -1,3 +1,4 @@
 /node_modules
 .wakatime-project
+.eslintrc.json
 .env
