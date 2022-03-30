@@ -1,26 +1,25 @@
 import { userRepository } from '../repositories/userRepository.js';
-import { likeRepositoy } from '../repositories/likeRepository.js';
+import { likeRepository } from '../repositories/likeRepository.js';
 
 export async function toggleLike(req, res) {
     const { like, postId } = req.body;
-
     try {
         const { user: userLocals } = res.locals;
-
+        
         const { rows: userRows } = await userRepository.getUserById(
             userLocals?.id
-        );
-
-        if (userRows.length === 0) {
-            return res.status(404).send('User not found');
-        }
-
-        const [user] = userRows;
-
+            );
+            
+            if (userRows.length === 0) {
+                return res.status(404).send('User not found');
+            }
+            
+            const [user] = userRows;
+            
         if (!like) {
-            await likeRepositoy.insertLike(user?.id, postId);
+            await likeRepository.insertLike(user?.id, postId);
         } else {
-            await likeRepositoy.removeLike(user?.id, postId);
+            await likeRepository.removeLike(user?.id, postId);
         }
 
         return res.status(200).send(!req.body.like);
@@ -34,7 +33,7 @@ export async function totalLike(req, res) {
     const { postId } = req.params;
 
     try {
-        const { rows } = await likeRepositoy.totalLike(postId);
+        const { rows } = await likeRepository.totalLike(postId);
 
         if (rows.length === 0) {
             return res.status(404).send('Post id not found');
@@ -63,7 +62,7 @@ export async function checkLikeUser(req, res) {
 
         const [user] = userRows;
 
-        const { rows: likeRows } = await likeRepositoy.checkLike(
+        const { rows: likeRows } = await likeRepository.checkLike(
             user?.id,
             postId
         );
@@ -84,7 +83,7 @@ export async function getTwoNamesThatLiked(req, res) {
     const { user: userLocals } = res.locals;
 
     try {
-        const { rows: checkLikeRows } = await likeRepositoy.checkLike(
+        const { rows: checkLikeRows } = await likeRepository.checkLike(
             userLocals?.id,
             postId
         );
@@ -94,12 +93,12 @@ export async function getTwoNamesThatLiked(req, res) {
             userLocalsLike = true;
         }
 
-        const { rows: likeRows } = await likeRepositoy.getTwoNamesThatLiked(
+        const { rows: likeRows } = await likeRepository.getTwoNamesThatLiked(
             userLocals?.id,
             postId
         );
 
-        const { rows: totalLikes } = await likeRepositoy.totalLike(postId);
+        const { rows: totalLikes } = await likeRepository.totalLike(postId);
 
         const [likes] = totalLikes;
 

@@ -12,7 +12,7 @@ async function trends() {
         ORDER BY total DESC
         LIMIT 10`
     );
-
+        
     return connection.query(query);
 }
 
