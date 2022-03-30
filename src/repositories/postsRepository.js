@@ -23,10 +23,13 @@ async function publish(
 async function listAll() {
     const query = format(
         `SELECT p.*, 
-        u.name author, u.image "profilePicture" 
+        u.name author, u.image "profilePicture", 
+        COALESCE(COUNT(r."postId")) AS "repostCount"
         FROM posts p
         LEFT JOIN users u ON u.id = p."userId"
-        ORDER BY p.id 
+        LEFT JOIN reposts r ON p.id = r."postId"
+        GROUP BY p.id, u.name, u.image
+        ORDER BY p.id
         DESC
         LIMIT 20`
     );
@@ -111,6 +114,11 @@ async function deletePost(postId) {
     return connection.query(query);
 }
 
+async function rePost(userId ,postId){
+    const query = format(`INSERT INTO reposts ("repostedByUserId", "postId") VALUES (?,?)`, [userId, postId]);
+
+    return connection.query(query)
+}
 export const postsRepository = {
     publish,
     listAll,
@@ -122,4 +130,5 @@ export const postsRepository = {
     getTrends,
     insertPostsTrend,
     insertTrendsHashtag,
+    rePost
 };

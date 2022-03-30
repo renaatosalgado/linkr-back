@@ -184,3 +184,16 @@ async function addHashtagsPost(hashtags, postId) {
         console.log(error);
     }
 }
+
+export async function rePost(req, res) {
+    const { user } = res.locals;
+    const { id } = req.params;
+
+    try {
+        await postsRepository.rePost(user.id, id);
+        res.sendStatus(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+}
