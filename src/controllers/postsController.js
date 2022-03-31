@@ -60,8 +60,10 @@ export async function createPost(req, res) {
 }
 
 export async function listPosts(req, res) {
+    const { lastPostId } = req.params;
+
     try {
-        const result = await postsRepository.listAll();
+        const result = await postsRepository.listAll(lastPostId);
 
         result.rows.map((post) => {
             let description = ``;

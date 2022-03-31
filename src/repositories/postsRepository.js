@@ -20,15 +20,24 @@ async function publish(
     return connection.query(query);
 }
 
-async function listAll() {
+async function listAll(lastPostId) {
+  let where = "";
+  let limit = `LIMIT 10`;
+
+  if(lastPostId) {
+    where = `WHERE p.id > ${lastPostId}`
+    limit = `LIMIT 100`;
+  
+}
     const query = format(
         `SELECT p.*, 
         u.name author, u.image "profilePicture" 
         FROM posts p
         LEFT JOIN users u ON u.id = p."userId"
+        ${where}
         ORDER BY p.id 
         DESC
-        LIMIT 20`
+        ${limit}`
     );
 
     return connection.query(query);
