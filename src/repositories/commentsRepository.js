@@ -27,7 +27,14 @@ async function getComments(postId) {
     return connection.query(query);
 }
 
+async function deleteComments(postId) {
+    const query = format(`DELETE FROM comments WHERE "postId"=?`, [postId]);
+
+    return connection.query(query);
+}
+
 export const commentsRepository = {
     createComment,
     getComments,
+    deleteComments,
 };

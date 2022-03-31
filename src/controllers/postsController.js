@@ -2,7 +2,7 @@ import { postsRepository } from '../repositories/postsRepository.js';
 import urlMetadata from 'url-metadata';
 import { userRepository } from '../repositories/userRepository.js';
 import { likeRepository } from '../repositories/likeRepository.js';
-import pkg from 'sqlstring';
+import { commentsRepository } from '../repositories/commentsRepository.js';
 
 export async function createPost(req, res) {
     const { url, description } = req.body;
@@ -117,6 +117,7 @@ export async function deletePost(req, res) {
 
     try {
         await likeRepository.deleteLikes(id);
+        await commentsRepository.deleteComments(id);
         await postsRepository.deletePostsTrends(id);
         await postsRepository.deletePost(id);
 
@@ -153,16 +154,13 @@ export async function editPost(req, res) {
 
 async function verifyHashtags(hashtags, postId) {
     const trends = await postsRepository.getTrends();
-    
-    if(trends.rows.length === 0){
+
+    if (trends.rows.length === 0) {
         const hashtagId = await postsRepository.insertTrendsHashtag(
             hashtags[i]
         );
 
-        await postsRepository.insertPostsTrend(
-            hashtagId.rows[0].id,
-            postId
-        );
+        await postsRepository.insertPostsTrend(hashtagId.rows[0].id, postId);
     }
     for (let i = 0; i < hashtags.length; i++) {
         for (let j = 0; j < trends.rows.length; j++) {

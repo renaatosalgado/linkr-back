@@ -17,6 +17,8 @@ export async function createComment(req, res) {
 
 export async function getComments(req, res) {
     const { id: postId } = req.params;
+    const { id: userId } = res.locals.user;
+
     try {
         const { rows } = await commentsRepository.getComments(postId);
 
