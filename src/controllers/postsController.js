@@ -60,12 +60,12 @@ export async function createPost(req, res) {
 }
 
 export async function listPosts(req, res) {
+    const { user } = res.locals;
     const { lastPostId } = req.params;
-
     try {
-        const result = await postsRepository.listAll(lastPostId);
-
-        result.rows.map((post) => {
+        const {rows: posts} = await postsRepository.listAll(user.id, lastPostId);
+        const {rows: repostCount} = await postsRepository.countReposts()
+        posts.map((post) => {
             let description = ``;
             for (let i = 0; i < post.urlDescription.length; i++) {
                 if (post.urlDescription[i] === '`') {
@@ -76,8 +76,18 @@ export async function listPosts(req, res) {
             }
             post.urlDescription = description;
         });
-
-        res.status(200).send(result.rows);
+        
+        posts.forEach((post, i) => {
+            repostCount.forEach((repost) => {
+                if(repost.postId === post.id){
+                  posts[i] =  {...post, repostCount: repost.repostCount}
+                }
+            })
+            if(!posts[i].repostCount){
+                posts[i] =  {...post, repostCount: 0}
+            }
+        })
+        res.status(200).send(posts);
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
@@ -154,15 +164,19 @@ export async function editPost(req, res) {
 
 async function verifyHashtags(hashtags, postId) {
     const trends = await postsRepository.getTrends();
-
-    if (trends.rows.length === 0) {
-        const hashtagId = await postsRepository.insertTrendsHashtag(
-            hashtags[i]
-        );
-
-        await postsRepository.insertPostsTrend(hashtagId.rows[0].id, postId);
-    }
+    
     for (let i = 0; i < hashtags.length; i++) {
+
+        if(trends.rows.length === 0){
+            const hashtagId = await postsRepository.insertTrendsHashtag(
+                hashtags[i]
+            );
+    
+            await postsRepository.insertPostsTrend(
+                hashtagId.rows[0].id,
+                postId
+            );
+        }
         for (let j = 0; j < trends.rows.length; j++) {
             if (hashtags[i] === trends.rows[j].name) {
                 await postsRepository.insertPostsTrend(
@@ -189,5 +203,18 @@ async function addHashtagsPost(hashtags, postId) {
         verifyHashtags(hashtags, postId);
     } catch (error) {
         console.log(error);
+    }
+}
+
+export async function rePost(req, res) {
+    const { user } = res.locals;
+    const { id } = req.params;
+
+    try {
+        await postsRepository.rePost(user.id, id);
+        res.sendStatus(200);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
     }
 }
