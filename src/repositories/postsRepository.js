@@ -12,50 +12,25 @@ async function publish(
     urlImage
 ) {
     const query = format(
-        `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage")
-        VALUES (?,?,?,?,?,?) RETURNING id`,
-        [description, url, userId, urlTitle, urlDescription, urlImage]
+        `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage", datetime)
+        VALUES (?,?,?,?,?,?,?) RETURNING id`,
+        [description, url, userId, urlTitle, urlDescription, urlImage, Date.now()]
     );
 
     return connection.query(query);
 }
 
 async function listAll(userId, lastPostId) {
-    let where = "";
+    
+    let whereP = "";
+    let whereR = "";
   let limit = `LIMIT 10`;
-
   if(lastPostId) {
-    where = `AND p.id > ${lastPostId}`
+    whereP = `AND p.datetime > '${lastPostId}'`
+    whereR = `AND r.datetime > '${lastPostId}'`
     limit = `LIMIT 100`;
   
 }
-    // const query = format(
-    //     `SELECT p.*, 
-    //     u.name author, u.image "profilePicture", 
-    //     COALESCE(COUNT(r."postId")) AS "repostCount"
-    //     FROM posts p
-    //     LEFT JOIN users u ON u.id = p."userId"
-    //     LEFT JOIN reposts r ON p.id = r."postId"
-    //     GROUP BY p.id, u.name, u.image
-    //     ORDER BY p.id
-    //     DESC
-    //     LIMIT 20`
-    // );
-
-    // const query =format(`
-    // SELECT 
-    //     p.*,
-    //     u.name author,
-    //     u.image "profilePicture"
-    // FROM posts p
-    // LEFT JOIN users u
-    //     ON u.id = p."userId"
-    // LEFT JOIN follows f
-    //     ON f."followedId" = p."userId"
-    // WHERE f."followerId" = ?
-    // ORDER BY p.id DESC
-    // LIMIT 20`);
-
     const query = format(`
     SELECT 
         p.id, p.description, p.url, p."userId", p."urlTitle", p."urlDescription", p."urlImage",
@@ -78,7 +53,7 @@ async function listAll(userId, lastPostId) {
             ON f."followedId" = r."repostedByUserId"
         WHERE
             f."followerId" = ?
-        )
+        ) ${whereR}
     UNION
     SELECT 
         p.*,
@@ -90,11 +65,11 @@ async function listAll(userId, lastPostId) {
         ON u.id = p."userId"
     LEFT JOIN follows f
         ON f."followedId" = p."userId"
-    WHERE f."followerId" = ? ${where}
+    WHERE f."followerId" = ? ${whereP}
     ORDER BY datetime DESC
-    ${limit} 
-    `, [userId])
-
+    ${limit}
+    `, [userId, userId])
+ 
     return connection.query(query);
 }
 
@@ -176,40 +151,11 @@ async function deletePost(postId) {
 }
 
 async function rePost(userId ,postId){
-    const query = format(`INSERT INTO reposts ("repostedByUserId", "postId") VALUES (?,?)`, [userId, postId]);
+    const query = format(`INSERT INTO reposts ("repostedByUserId", "postId", datetime) VALUES (?,?,?)`, [userId, postId, Date.now()]);
 
     return connection.query(query)
 }
 
-async function getRePosts(userId){
-    const query =format(`
-    SELECT 
-        p.*,
-        "postUser".name AS author,
-        "postUser".image AS "profilePicture",
-        "repostUser".name AS "repostedBy"
-    FROM reposts r
-    RIGHT JOIN posts p
-        ON p.id = r."postId"
-    JOIN users "postUser"
-        ON "postUser".id = p."userId"
-    JOIN users "repostUser"
-        ON "repostUser".id = r."repostedByUserId"
-    WHERE r."repostedByUserId" IN (
-        SELECT
-            f."followedId"
-        FROM reposts r
-        JOIN follows f
-            ON f."followedId" = r."repostedByUserId"
-        WHERE
-            f."followerId" = ?
-        )
-        ORDER BY
-            r.id DESC
-    `, [userId]);
-
-    return connection.query(query);
-}
 export const postsRepository = {
     publish,
     listAll,
@@ -222,5 +168,4 @@ export const postsRepository = {
     insertPostsTrend,
     insertTrendsHashtag,
     rePost,
-    getRePosts
 };

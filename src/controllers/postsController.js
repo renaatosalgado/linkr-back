@@ -64,8 +64,7 @@ export async function listPosts(req, res) {
     const { lastPostId } = req.params;
     try {
         const {rows: posts} = await postsRepository.listAll(user.id, lastPostId);
-        // const {rows: reposts} = await postsRepository.getRePosts(user.id)
-
+        console.log(posts)
         posts.map((post) => {
             let description = ``;
             for (let i = 0; i < post.urlDescription.length; i++) {
@@ -77,22 +76,7 @@ export async function listPosts(req, res) {
             }
             post.urlDescription = description;
         });
-        // reposts.map((post) => {
-        //     let description = ``;
-        //     for (let i = 0; i < post.urlDescription.length; i++) {
-        //         if (post.urlDescription[i] === '`') {
-        //             description += "'";
-        //         } else {
-        //             description += post.urlDescription[i];
-        //         }
-        //     }
-        //     post.urlDescription = description;
-        // });
-
-        // const body = { 
-        //                 posts,
-        //                 reposts
-        //             }
+        
 
         res.status(200).send(posts);
     } catch (error) {
