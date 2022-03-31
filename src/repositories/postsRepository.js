@@ -20,7 +20,15 @@ async function publish(
     return connection.query(query);
 }
 
-async function listAll(userId) {
+async function listAll(userId, lastPostId) {
+    let where = "";
+  let limit = `LIMIT 10`;
+
+  if(lastPostId) {
+    where = `AND p.id > ${lastPostId}`
+    limit = `LIMIT 100`;
+  
+}
     // const query = format(
     //     `SELECT p.*, 
     //     u.name author, u.image "profilePicture", 
@@ -82,8 +90,9 @@ async function listAll(userId) {
         ON u.id = p."userId"
     LEFT JOIN follows f
         ON f."followedId" = p."userId"
-    WHERE f."followerId" = ?
-    ORDER BY datetime desc 
+    WHERE f."followerId" = ? ${where}
+    ORDER BY datetime DESC
+    ${limit} 
     `, [userId])
 
     return connection.query(query);

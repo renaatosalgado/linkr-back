@@ -26,5 +26,6 @@ postsRouter.put("/posts/:id", validateToken, editPost);
 postsRouter.get('/user/:id', validateToken, listUserPosts);
 postsRouter.delete('/posts/:id', validateToken, deletePost);
 postsRouter.post('/posts/:id/repost', validateToken, rePost);
+postsRouter.get("/posts/update/:lastPostId", validateToken, listPosts);
 
 export default postsRouter;
