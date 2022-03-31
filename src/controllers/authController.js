@@ -18,6 +18,8 @@ export async function login(req, res) {
             const token = uuid();
             await authRepository.createSession(token, user.id);
 
+            res.locals.user = user;
+
             delete user.password;
 
             return res.send({ token, user });
