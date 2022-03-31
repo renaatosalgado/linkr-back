@@ -1,13 +1,13 @@
 import { postsRepository } from '../repositories/postsRepository.js';
 import urlMetadata from 'url-metadata';
 import { userRepository } from '../repositories/userRepository.js';
-import { likeRepositoy } from '../repositories/likeRepository.js';
+import { likeRepository } from '../repositories/likeRepository.js';
+import pkg from 'sqlstring';
 
 export async function createPost(req, res) {
     const { url, description } = req.body;
     const user = res.locals.user;
     const descriptionWords = description.split(' ');
-
     let hashtags = [];
     let urlTitle = '';
     let urlDescription = '';
@@ -21,7 +21,6 @@ export async function createPost(req, res) {
             hashtags.push(descriptionWords[i]);
         }
     }
-
     try {
         const metadata = await urlMetadata(url);
         if (!metadata.image) {
@@ -115,7 +114,7 @@ export async function deletePost(req, res) {
     const { id } = req.params;
 
     try {
-        await likeRepositoy.deleteLikes(id);
+        await likeRepository.deleteLikes(id);
         await postsRepository.deletePostsTrends(id);
         await postsRepository.deletePost(id);
 
@@ -152,7 +151,17 @@ export async function editPost(req, res) {
 
 async function verifyHashtags(hashtags, postId) {
     const trends = await postsRepository.getTrends();
+    
+    if(trends.rows.length === 0){
+        const hashtagId = await postsRepository.insertTrendsHashtag(
+            hashtags[i]
+        );
 
+        await postsRepository.insertPostsTrend(
+            hashtagId.rows[0].id,
+            postId
+        );
+    }
     for (let i = 0; i < hashtags.length; i++) {
         for (let j = 0; j < trends.rows.length; j++) {
             if (hashtags[i] === trends.rows[j].name) {
@@ -166,7 +175,6 @@ async function verifyHashtags(hashtags, postId) {
                 const hashtagId = await postsRepository.insertTrendsHashtag(
                     hashtags[i]
                 );
-
                 await postsRepository.insertPostsTrend(
                     hashtagId.rows[0].id,
                     postId
