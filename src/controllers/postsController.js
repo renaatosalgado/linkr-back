@@ -62,10 +62,12 @@ export async function createPost(req, res) {
 }
 
 export async function listPosts(req, res) {
+    const { user } = res.locals;
     try {
-        const result = await postsRepository.listAll();
+        const {rows: posts} = await postsRepository.listAll(user.id);
+        // const {rows: reposts} = await postsRepository.getRePosts(user.id)
 
-        result.rows.map((post) => {
+        posts.map((post) => {
             let description = ``;
             for (let i = 0; i < post.urlDescription.length; i++) {
                 if (post.urlDescription[i] === '`') {
@@ -76,8 +78,24 @@ export async function listPosts(req, res) {
             }
             post.urlDescription = description;
         });
+        // reposts.map((post) => {
+        //     let description = ``;
+        //     for (let i = 0; i < post.urlDescription.length; i++) {
+        //         if (post.urlDescription[i] === '`') {
+        //             description += "'";
+        //         } else {
+        //             description += post.urlDescription[i];
+        //         }
+        //     }
+        //     post.urlDescription = description;
+        // });
 
-        res.status(200).send(result.rows);
+        // const body = { 
+        //                 posts,
+        //                 reposts
+        //             }
+
+        res.status(200).send(posts);
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
