@@ -156,6 +156,19 @@ async function rePost(userId ,postId){
     return connection.query(query)
 }
 
+async function countReposts(){
+    const query = format(`
+    SELECT
+    reposts."postId",
+    COUNT(reposts."postId") AS "repostCount"
+    FROM 
+    reposts
+    GROUP BY "postId"
+    `)
+
+return connection.query(query)
+}
+
 export const postsRepository = {
     publish,
     listAll,
@@ -168,4 +181,5 @@ export const postsRepository = {
     insertPostsTrend,
     insertTrendsHashtag,
     rePost,
+    countReposts
 };
