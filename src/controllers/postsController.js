@@ -83,12 +83,10 @@ export async function listPosts(req, res) {
                   posts[i] =  {...post, repostCount: repost.repostCount}
                 }
             })
-            console.log(!posts[i].repostCount)
             if(!posts[i].repostCount){
                 posts[i] =  {...post, repostCount: 0}
             }
         })
-        console.log(posts)
         res.status(200).send(posts);
     } catch (error) {
         console.log(error);
