@@ -14,7 +14,15 @@ async function createComment(text, postId, userId) {
 }
 
 async function getComments(postId) {
-    const query = format(`SELECT * FROM comments WHERE "postId"=?`, [postId]);
+    const query = format(
+        `SELECT c.id, c.text, c."userId" AS "commentUserId", p."userId" AS "postUserId", u.image AS "userImage", u.name AS "userName" 
+        FROM comments c
+        JOIN posts p ON p.id=c."postId"
+        JOIN users u ON u.id=c."userId"
+        WHERE c."postId"=?
+        ORDER BY c.id ASC`,
+        [postId]
+    );
 
     return connection.query(query);
 }

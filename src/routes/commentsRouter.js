@@ -11,8 +11,8 @@ const commentsRouter = Router();
 
 commentsRouter.post(
     '/posts/:id/comments',
-    validateToken,
     validateSchemaMiddleware(commentSchema),
+    validateToken,
     createComment
 );
 
