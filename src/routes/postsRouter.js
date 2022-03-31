@@ -24,5 +24,6 @@ postsRouter.get("/posts/hashtag/:hashtag", getHashtagPost);
 postsRouter.put("/posts/:id", validateToken, editPost);
 postsRouter.get('/user/:id', validateToken, listUserPosts);
 postsRouter.delete('/posts/:id', validateToken, deletePost);
+postsRouter.get("/posts/update/:lastPostId", validateToken, listPosts);
 
 export default postsRouter;
