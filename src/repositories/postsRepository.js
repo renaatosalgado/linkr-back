@@ -4,12 +4,12 @@ import pkg from 'sqlstring';
 const { format } = pkg;
 
 async function publish(
-    description,
-    url,
-    userId,
-    urlTitle,
-    urlDescription,
-    urlImage
+  description,
+  url,
+  userId,
+  urlTitle,
+  urlDescription,
+  urlImage
 ) {
     const query = format(
         `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage", datetime)
