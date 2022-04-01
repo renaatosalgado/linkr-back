@@ -61,9 +61,10 @@ export async function createPost(req, res) {
 
 export async function listPosts(req, res) {
     const { user } = res.locals;
-    const { lastPostId } = req.params;
+    const { lastPostDatetime } = req.params;
+    const { pageNumber } = req.query;
     try {
-        const {rows: posts} = await postsRepository.listAll(user.id, lastPostId);
+        const {rows: posts} = await postsRepository.listAll(user.id, lastPostDatetime, pageNumber);
         const {rows: repostCount} = await postsRepository.countReposts()
         posts.map((post) => {
             let description = ``;
