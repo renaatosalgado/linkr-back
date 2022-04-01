@@ -102,6 +102,17 @@ export async function listUserPosts(req, res) {
             rows: [user],
         } = await userRepository.getUserById(userId);
         const authorName = user.name;
+        const {rows: repostCount} = await postsRepository.countReposts()
+        posts.forEach((post, i) => {
+            repostCount.forEach((repost) => {
+                if(repost.postId === post.id){
+                  posts[i] =  {...post, repostCount: repost.repostCount}
+                }
+            })
+            if(!posts[i].repostCount){
+                posts[i] =  {...post, repostCount: 0}
+            }
+        })
 
         res.status(200).send({ posts: [...posts], authorName });
     } catch (error) {
@@ -113,9 +124,20 @@ export async function listUserPosts(req, res) {
 export async function getHashtagPost(req, res) {
     const { hashtag } = req.params;
     try {
-        const result = await postsRepository.listHashtag(hashtag);
+        const {rows: posts} = await postsRepository.listHashtag(hashtag);
+        const {rows: repostCount} = await postsRepository.countReposts()
+        posts.forEach((post, i) => {
+            repostCount.forEach((repost) => {
+                if(repost.postId === post.id){
+                  posts[i] =  {...post, repostCount: repost.repostCount}
+                }
+            })
+            if(!posts[i].repostCount){
+                posts[i] =  {...post, repostCount: 0}
+            }
+        })
 
-        res.status(200).send(result.rows);
+        res.status(200).send(posts);
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
