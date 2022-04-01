@@ -1,6 +1,10 @@
 import { Router } from 'express';
-import { toggleFollow, checkIfFollow } from '../controllers/followController.js'
 import connection from '../db.js';
+import {
+    toggleFollow,
+    checkIfFollow,
+    getFollows,
+} from '../controllers/followController.js';
 import { validateToken } from '../middleware/validateToken.js';
 
 const followRouter = Router();
@@ -62,5 +66,7 @@ followRouter.get('/is-follow-user/:userId', async (req, res) => {
 
   return res.status(200).json({ message: 'OK', status: postRows.length })
 });
+
+followRouter.get('/follows', validateToken, getFollows);
 
 export default followRouter;
