@@ -20,17 +20,22 @@ async function publish(
     return connection.query(query);
 }
 
-async function listAll(userId, lastPostId) {
+async function listAll(userId, lastPostDatetime, pageNumber) {
     
-    let whereP = "";
-    let whereR = "";
-  let limit = `LIMIT 10`;
-  if(lastPostId) {
-    whereP = `AND p.datetime > '${lastPostId}'`
-    whereR = `AND r.datetime > '${lastPostId}'`
+    let wherePost = "";
+    let whereRepost = "";
+    let offset = "";
+    let limit = `LIMIT 10`; 
+
+  if(lastPostDatetime) {
+    wherePost = `AND p.datetime > '${lastPostDatetime}'`;
+    whereRepost = `AND r.datetime > '${lastPostDatetime}'`;
     limit = `LIMIT 100`;
-  
-}
+  }
+
+  if(pageNumber > 0) {
+      offset = `OFFSET ${pageNumber * 10}`
+  }
     const query = format(`
     SELECT 
         p.id, p.description, p.url, p."userId", p."urlTitle", p."urlDescription", p."urlImage",
@@ -53,7 +58,7 @@ async function listAll(userId, lastPostId) {
             ON f."followedId" = r."repostedByUserId"
         WHERE
             f."followerId" = ? OR r."repostedByUserId" = ?
-        ) ${whereR}
+        ) ${whereRepost}
     UNION
     SELECT 
         p.*,
@@ -65,9 +70,10 @@ async function listAll(userId, lastPostId) {
         ON u.id = p."userId"
     LEFT JOIN follows f
         ON f."followedId" = p."userId"
-    WHERE f."followerId" = ? ${whereP}
+    WHERE f."followerId" = ? ${wherePost}
     ORDER BY datetime DESC
     ${limit}
+    ${offset}
     `, [userId, userId, userId])
  
     return connection.query(query);

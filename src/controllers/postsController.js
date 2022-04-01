@@ -61,9 +61,11 @@ export async function createPost(req, res) {
 
 export async function listPosts(req, res) {
     const { user } = res.locals;
-    const { lastPostId } = req.params;
+    const { lastPostDatetime } = req.params;
+    const { pageNumber } = req.query;
+    console.log(pageNumber)
     try {
-        const {rows: posts} = await postsRepository.listAll(user.id, lastPostId);
+        const {rows: posts} = await postsRepository.listAll(user.id, lastPostDatetime, pageNumber);
         const {rows: repostCount} = await postsRepository.countReposts()
         posts.map((post) => {
             let description = ``;
@@ -234,7 +236,6 @@ export async function rePost(req, res) {
 
     try {
         const alredyRepostedByUser = await postsRepository.checkRepost(user.id, id)
-        console.log(alredyRepostedByUser)
         if(alredyRepostedByUser.rowCount > 0){
             return res.status(409).send("User alredy reposted this post")
         }
