@@ -43,7 +43,8 @@ async function listAll(userId, lastPostDatetime, pageNumber) {
         r.datetime,
         postUser.name AS author,
         postUser.image AS "profilePicture",
-        repostUser.name AS "repostedBy"
+        repostUser.name AS "repostedBy",
+        r."repostedByUserId"
     FROM reposts r
     JOIN posts p
         ON p.id = r."postId"
@@ -65,6 +66,7 @@ async function listAll(userId, lastPostDatetime, pageNumber) {
         p.*,
         u.name author,
         u.image "profilePicture",
+        NULL,
         NULL
     FROM posts p
     LEFT JOIN users u
@@ -188,6 +190,14 @@ async function checkRepost(userId, postId){
 return connection.query(query)
 }
 
+async function deleteRepost(postId){
+    const query = format(`
+    DELETE FROM reposts WHERE "postId" = ?
+    `, [postId])
+
+return connection.query(query)
+}
+
 export const postsRepository = {
     publish,
     listAll,
@@ -201,5 +211,6 @@ export const postsRepository = {
     insertTrendsHashtag,
     rePost,
     countReposts,
-    checkRepost
+    checkRepost,
+    deleteRepost
 };
