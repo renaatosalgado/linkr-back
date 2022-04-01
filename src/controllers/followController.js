@@ -47,3 +47,21 @@ export async function getFollows(req, res) {
         return res.status(500);
     }
 }
+
+export async function checkIfFollowUser(req, res) {
+    const { userId } = req.params;
+
+    const { rows: followedRows } = await followRepository.getFollows(userId);
+
+    if (followedRows.length === 0) {
+        return res.status(200).json({ message: `You still don't follow anyone. Look for new friends!` });
+    }
+
+    const { rows: postRows } = await followRepository.checkIfUserFollowsSomeone(userId);
+
+    if (postRows.length === 0) {
+        return res.status(200).json({ message: 'No posts found from your friends' });
+    }
+
+    return res.status(200).json({ message: 'There are posts' });
+}
