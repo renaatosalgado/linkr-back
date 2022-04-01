@@ -11,30 +11,73 @@ async function publish(
   urlDescription,
   urlImage
 ) {
-    //  const query = format(
-    //      `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage")
-    //      VALUES (?,?,?,?,?,?)`,
-    //      [description, url, userId, urlTitle, urlDescription, urlImage]
-    //  );
-
-    return connection.query(
-        `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage") 
-        VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
-        [description, url, userId, urlTitle, urlDescription, urlImage]
+    const query = format(
+        `INSERT INTO posts (description, url, "userId", "urlTitle", "urlDescription", "urlImage", datetime)
+        VALUES (?,?,?,?,?,?,?) RETURNING id`,
+        [description, url, userId, urlTitle, urlDescription, urlImage, Date.now()]
     );
+
+    return connection.query(query);
 }
 
-async function listAll() {
-    const query = format(
-        `SELECT p.*, 
-        u.name author, u.image "profilePicture" 
-        FROM posts p
-        LEFT JOIN users u ON u.id = p."userId"
-        ORDER BY p.id 
-        DESC
-        LIMIT 20`
-    );
+async function listAll(userId, lastPostDatetime, pageNumber) {
+    
+    let wherePost = "";
+    let whereRepost = "";
+    let offset = "";
+    let limit = `LIMIT 10`; 
 
+  if(lastPostDatetime) {
+    wherePost = `AND p.datetime > '${lastPostDatetime}'`;
+    whereRepost = `AND r.datetime > '${lastPostDatetime}'`;
+    limit = `LIMIT 100`;
+  }
+
+  if(pageNumber > 0) {
+      offset = `OFFSET ${pageNumber * 10}`
+  }
+    const query = format(`
+    SELECT 
+        p.id, p.description, p.url, p."userId", p."urlTitle", p."urlDescription", p."urlImage",
+        r.datetime,
+        postUser.name AS author,
+        postUser.image AS "profilePicture",
+        repostUser.name AS "repostedBy",
+        r."repostedByUserId"
+    FROM reposts r
+    JOIN posts p
+        ON p.id = r."postId"
+    JOIN users postUser
+        ON postUser.id = p."userId"
+    JOIN users repostUser
+        ON repostUser.id = r."repostedByUserId"
+    WHERE r."repostedByUserId" IN (
+        SELECT
+            f."followedId"
+        FROM reposts r
+        JOIN follows f
+            ON f."followedId" = r."repostedByUserId"
+        WHERE
+            f."followerId" = ? OR r."repostedByUserId" = ?
+        ) ${whereRepost}
+    UNION
+    SELECT 
+        p.*,
+        u.name author,
+        u.image "profilePicture",
+        NULL,
+        NULL
+    FROM posts p
+    LEFT JOIN users u
+        ON u.id = p."userId"
+    LEFT JOIN follows f
+        ON f."followedId" = p."userId"
+    WHERE f."followerId" = ? ${wherePost}
+    ORDER BY datetime DESC
+    ${limit}
+    ${offset}
+    `, [userId, userId, userId])
+ 
     return connection.query(query);
 }
 
@@ -115,6 +158,45 @@ async function deletePost(postId) {
     return connection.query(query);
 }
 
+async function rePost(userId ,postId){
+    const query = format(`INSERT INTO reposts ("repostedByUserId", "postId", datetime) VALUES (?,?,?)`, [userId, postId, Date.now()]);
+
+    return connection.query(query)
+}
+
+async function countReposts(){
+    const query = format(`
+    SELECT
+    reposts."postId",
+    COUNT(reposts."postId") AS "repostCount"
+    FROM 
+    reposts
+    GROUP BY "postId"
+    `)
+
+return connection.query(query)
+}
+
+async function checkRepost(userId, postId){
+    const query = format(`
+    SELECT
+    *
+    FROM
+    reposts
+    WHERE reposts."repostedByUserId" = ? AND reposts."postId" = ? 
+    `,[userId, postId])
+
+return connection.query(query)
+}
+
+async function deleteRepost(postId){
+    const query = format(`
+    DELETE FROM reposts WHERE "postId" = ?
+    `, [postId])
+
+return connection.query(query)
+}
+
 export const postsRepository = {
     publish,
     listAll,
@@ -126,4 +208,8 @@ export const postsRepository = {
     getTrends,
     insertPostsTrend,
     insertTrendsHashtag,
+    rePost,
+    countReposts,
+    checkRepost,
+    deleteRepost
 };
