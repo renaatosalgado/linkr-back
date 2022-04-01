@@ -52,7 +52,7 @@ async function listAll(userId, lastPostId) {
         JOIN follows f
             ON f."followedId" = r."repostedByUserId"
         WHERE
-            f."followerId" = ?
+            f."followerId" = ? OR r."repostedByUserId" = ?
         ) ${whereR}
     UNION
     SELECT 
@@ -68,7 +68,7 @@ async function listAll(userId, lastPostId) {
     WHERE f."followerId" = ? ${whereP}
     ORDER BY datetime DESC
     ${limit}
-    `, [userId, userId])
+    `, [userId, userId, userId])
  
     return connection.query(query);
 }
@@ -169,6 +169,18 @@ async function countReposts(){
 return connection.query(query)
 }
 
+async function checkRepost(userId, postId){
+    const query = format(`
+    SELECT
+    *
+    FROM
+    reposts
+    WHERE reposts."repostedByUserId" = ? AND reposts."postId" = ? 
+    `,[userId, postId])
+
+return connection.query(query)
+}
+
 export const postsRepository = {
     publish,
     listAll,
@@ -181,5 +193,6 @@ export const postsRepository = {
     insertPostsTrend,
     insertTrendsHashtag,
     rePost,
-    countReposts
+    countReposts,
+    checkRepost
 };

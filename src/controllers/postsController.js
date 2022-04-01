@@ -102,6 +102,17 @@ export async function listUserPosts(req, res) {
             rows: [user],
         } = await userRepository.getUserById(userId);
         const authorName = user.name;
+        const {rows: repostCount} = await postsRepository.countReposts()
+        posts.forEach((post, i) => {
+            repostCount.forEach((repost) => {
+                if(repost.postId === post.id){
+                  posts[i] =  {...post, repostCount: repost.repostCount}
+                }
+            })
+            if(!posts[i].repostCount){
+                posts[i] =  {...post, repostCount: 0}
+            }
+        })
 
         res.status(200).send({ posts: [...posts], authorName });
     } catch (error) {
@@ -113,9 +124,20 @@ export async function listUserPosts(req, res) {
 export async function getHashtagPost(req, res) {
     const { hashtag } = req.params;
     try {
-        const result = await postsRepository.listHashtag(hashtag);
+        const {rows: posts} = await postsRepository.listHashtag(hashtag);
+        const {rows: repostCount} = await postsRepository.countReposts()
+        posts.forEach((post, i) => {
+            repostCount.forEach((repost) => {
+                if(repost.postId === post.id){
+                  posts[i] =  {...post, repostCount: repost.repostCount}
+                }
+            })
+            if(!posts[i].repostCount){
+                posts[i] =  {...post, repostCount: 0}
+            }
+        })
 
-        res.status(200).send(result.rows);
+        res.status(200).send(posts);
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
@@ -211,10 +233,15 @@ export async function rePost(req, res) {
     const { id } = req.params;
 
     try {
+        const alredyRepostedByUser = await postsRepository.checkRepost(user.id, id)
+        console.log(alredyRepostedByUser)
+        if(alredyRepostedByUser.rowCount > 0){
+            return res.status(409).send("User alredy reposted this post")
+        }
         await postsRepository.rePost(user.id, id);
         res.sendStatus(200);
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
+        res.status(500).send("Something went wrong. Please try again");
     }
 }
