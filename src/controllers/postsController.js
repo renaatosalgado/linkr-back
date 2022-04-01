@@ -211,10 +211,15 @@ export async function rePost(req, res) {
     const { id } = req.params;
 
     try {
+        const alredyRepostedByUser = await postsRepository.checkRepost(user.id, id)
+        console.log(alredyRepostedByUser)
+        if(alredyRepostedByUser.rowCount > 0){
+            return res.status(409).send("User alredy reposted this post")
+        }
         await postsRepository.rePost(user.id, id);
         res.sendStatus(200);
     } catch (error) {
         console.log(error);
-        res.sendStatus(500);
+        res.status(500).send("Something went wrong. Please try again");
     }
 }

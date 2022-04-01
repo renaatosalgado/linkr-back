@@ -169,6 +169,18 @@ async function countReposts(){
 return connection.query(query)
 }
 
+async function checkRepost(userId, postId){
+    const query = format(`
+    SELECT
+    *
+    FROM
+    reposts
+    WHERE reposts."repostedByUserId" = ? AND reposts."postId" = ? 
+    `,[userId, postId])
+
+return connection.query(query)
+}
+
 export const postsRepository = {
     publish,
     listAll,
@@ -181,5 +193,6 @@ export const postsRepository = {
     insertPostsTrend,
     insertTrendsHashtag,
     rePost,
-    countReposts
+    countReposts,
+    checkRepost
 };
