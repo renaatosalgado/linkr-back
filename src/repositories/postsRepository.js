@@ -183,6 +183,14 @@ async function checkRepost(userId, postId){
 return connection.query(query)
 }
 
+async function deleteRepost(postId){
+    const query = format(`
+    DELETE FROM reposts WHERE "postId" = ?
+    `, [postId])
+
+return connection.query(query)
+}
+
 export const postsRepository = {
     publish,
     listAll,
@@ -196,5 +204,6 @@ export const postsRepository = {
     insertTrendsHashtag,
     rePost,
     countReposts,
-    checkRepost
+    checkRepost,
+    deleteRepost
 };

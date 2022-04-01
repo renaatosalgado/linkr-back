@@ -148,6 +148,7 @@ export async function deletePost(req, res) {
     const { id } = req.params;
 
     try {
+        await postsRepository.deleteRepost(id);
         await likeRepository.deleteLikes(id);
         await commentsRepository.deleteComments(id);
         await postsRepository.deletePostsTrends(id);
