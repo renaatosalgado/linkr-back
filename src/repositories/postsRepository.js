@@ -36,6 +36,7 @@ async function listAll(userId, lastPostDatetime, pageNumber) {
   if(pageNumber > 0) {
       offset = `OFFSET ${pageNumber * 10}`
   }
+  console.log({offset})
     const query = format(`
     SELECT 
         p.id, p.description, p.url, p."userId", p."urlTitle", p."urlDescription", p."urlImage",
