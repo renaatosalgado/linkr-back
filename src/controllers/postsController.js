@@ -234,7 +234,6 @@ export async function rePost(req, res) {
 
     try {
         const alredyRepostedByUser = await postsRepository.checkRepost(user.id, id)
-        console.log(alredyRepostedByUser)
         if(alredyRepostedByUser.rowCount > 0){
             return res.status(409).send("User alredy reposted this post")
         }
